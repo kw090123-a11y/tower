@@ -117,7 +117,7 @@ kbd{font:inherit;font-size:11.5px;background:#1b2840;border:1px solid #2a3a58;bo
   <div class="statusbar">
     <div class="stat"><div class="k">웨이브</div><div class="v" id="uiWave">0</div></div>
     <div class="stat lives"><div class="k">코어 내구도</div><div class="v" id="uiLives">20</div></div>
-    <div class="stat credit"><div class="k">크레딧</div><div class="v" id="uiCredit">220</div></div>
+    <div class="stat credit"><div class="k">크레딧</div><div class="v" id="uiCredit">300</div></div>
     <div class="stat"><div class="k">최고 기록</div><div class="v" id="uiBest">0</div></div>
     <div class="spacer"></div>
     <div class="controls">
@@ -221,18 +221,18 @@ const ORDER=['laser','pulse','emp','cryo'];
 
 /* ---------- 적 ---------- */
 const UNITS={
-  scout:{name:'정찰 드론',hp:40,speed:112,reward:6,color:'#7ee787',size:9,leak:1,
+  scout:{name:'정찰 드론',hp:40,speed:112,reward:8,color:'#7ee787',size:9,leak:1,
     note:'빠르지만 약합니다. 연사에 잘 녹습니다.'},
-  grunt:{name:'보병 로봇',hp:100,speed:70,reward:11,color:'#93b4ff',size:12,leak:1,
+  grunt:{name:'보병 로봇',hp:100,speed:70,reward:14,color:'#93b4ff',size:12,leak:1,
     note:'평범한 주력 병력입니다.'},
-  shield:{name:'차폐 유닛',hp:120,shield:160,speed:62,reward:24,color:'#ffd166',size:13,leak:2,
+  shield:{name:'차폐 유닛',hp:120,shield:160,speed:62,reward:28,color:'#ffd166',size:13,leak:2,
     note:'보호막을 먼저 깎아야 합니다. 안 맞으면 회복하고, EMP에 특히 약합니다.'},
-  splitter:{name:'분열체',hp:150,speed:66,reward:20,color:'#c084fc',size:14,leak:2,split:3,
+  splitter:{name:'분열체',hp:150,speed:66,reward:24,color:'#c084fc',size:14,leak:2,split:3,
     note:'죽으면 파편 3기로 쪼개집니다. 범위 공격으로 한 번에 정리하세요.'},
-  shard:{name:'파편',hp:34,speed:130,reward:3,color:'#e2b8ff',size:7,leak:1,hidden:true},
-  tank:{name:'중장갑 유닛',hp:340,speed:44,reward:28,color:'#f0883e',size:16,leak:2,
+  shard:{name:'파편',hp:34,speed:130,reward:4,color:'#e2b8ff',size:7,leak:1,hidden:true},
+  tank:{name:'중장갑 유닛',hp:340,speed:44,reward:32,color:'#f0883e',size:16,leak:2,
     note:'느리지만 매우 단단합니다. 단일 저격으로 녹이세요.'},
-  boss:{name:'지휘 코어',hp:1500,shield:600,speed:36,reward:140,color:'#ff4d6d',size:22,leak:5,
+  boss:{name:'지휘 코어',hp:1500,shield:600,speed:36,reward:160,color:'#ff4d6d',size:22,leak:5,
     note:'10웨이브마다 등장합니다. 보호막과 체력을 모두 갖췄습니다.'}
 };
 
@@ -241,7 +241,7 @@ let G, best=0;
 try{ best=parseInt(localStorage.getItem('orbital-best')||'0',10)||0; }catch(e){}
 
 function newGame(){
-  G={wave:0,lives:20,credit:220,running:false,over:false,speed:1,
+  G={wave:0,lives:20,credit:300,running:false,over:false,speed:1,
      towers:[],enemies:[],shots:[],fx:[],queue:[],spawnT:0,
      build:'laser',sel:null,hover:null,t:0};
   syncUI();
@@ -251,18 +251,18 @@ function newGame(){
 function buildWave(w){
   const q=[]; const add=(type,n,gap)=>{for(let i=0;i<n;i++) q.push({type,gap});};
   if(w%10===0){
-    add('grunt',6,0.45); add('shield',3+Math.floor(w/10),0.7);
-    add('tank',2+Math.floor(w/10),0.85); add('boss',Math.max(1,Math.floor(w/20)),1.6);
+    add('grunt',6,0.45); add('shield',2+Math.floor(w/10),0.7);
+    add('tank',1+Math.floor(w/10),0.85); add('boss',Math.max(1,Math.floor(w/20)),1.6);
   }else{
-    add('scout',4+Math.floor(w*0.8),0.55);
-    if(w>=3) add('grunt',2+Math.floor(w*0.55),0.7);
-    if(w>=4) add('splitter',1+Math.floor((w-3)/2),0.95);
-    if(w>=5) add('shield',1+Math.floor((w-4)/2),0.9);
-    if(w>=7) add('tank',Math.floor((w-5)/2),1.1);
+    add('scout',3+Math.floor(w*0.7),0.6);
+    if(w>=4) add('grunt',1+Math.floor(w*0.5),0.75);
+    if(w>=6) add('splitter',1+Math.floor((w-5)/2),0.95);
+    if(w>=7) add('shield',1+Math.floor((w-6)/2),0.9);
+    if(w>=9) add('tank',Math.floor((w-7)/2),1.1);
   }
   return q;
 }
-const hpScale=w=>1+(w-1)*0.26+Math.pow(w-1,2)*0.014;
+const hpScale=w=>1+(w-1)*0.14+Math.pow(w-1,2)*0.016;
 const spScale=w=>Math.min(1.5,1+(w-1)*0.013);
 
 function startWave(){
@@ -449,7 +449,7 @@ function step(dt){
   }
   for(let i=G.fx.length-1;i>=0;i--){ G.fx[i].life-=dt; if(G.fx[i].life<=0) G.fx.splice(i,1); }
   if(G.running&&!G.queue.length&&!G.enemies.length){
-    G.running=false; G.credit+=20+G.wave*3;
+    G.running=false; G.credit+=25+G.wave*4;
   }
 }
 function gameOver(){
